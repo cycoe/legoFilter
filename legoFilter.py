@@ -18,8 +18,8 @@ class LegoFilter():
             exit(0)
         if not os.path.exists(self.distImgFile):
             print("Input the image name you want to cover a filer!")
-        self.modelImgFile = 'ori.png'
-        fullModelImgObj = grey(Image.open(self.modelImgFile).convert('RGBA'))
+        self.modelImgFile = 'model.png'
+        fullModelImgObj = grey(Image.open(self.modelImgFile))
         self.modelImgObj = fullModelImgObj.crop((0, 0, fullModelImgObj.size[0]//2, fullModelImgObj.size[1]//2))
         self.modelImgObj = self.modelImgObj.resize((self.modelSize, self.modelSize), Image.ANTIALIAS)
         self.modelWidth = self.modelImgObj.size[0]
@@ -28,21 +28,21 @@ class LegoFilter():
         self.centerColor =  self.modelPixdata[self.modelWidth - 1, self.modelHeight - 1]
         self.borderDict = {}
         for i in range(self.modelWidth//40 + 1):
-            self.borderDict[i] = (-20, -20, -20, 0)
-            self.borderDict[self.modelWidth - (i+1)] = (20, 20, 20, 0)
+            self.borderDict[i] = (-20, -20, -20)
+            self.borderDict[self.modelWidth - (i+1)] = (20, 20, 20)
     def single2Img(self, a, b):
-        avgColor = (0, 0, 0, 0)
+        avgColor = (0, 0, 0)
         for x in range(self.modelWidth):
             for y in range(self.modelHeight):
-                avgColor = tuple(self.distImgPixData[x+self.modelWidth*a, y+self.modelHeight*b][i] + avgColor[i] for i in range(4))
-        avgColor = tuple(int(avgColor[i]/(self.modelWidth*self.modelHeight)) for i in range(4))
+                avgColor = tuple(self.distImgPixData[x+self.modelWidth*a, y+self.modelHeight*b][i] + avgColor[i] for i in range(3))
+        avgColor = tuple(int(avgColor[i]/(self.modelWidth*self.modelHeight)) for i in range(3))
         for x in range(self.modelWidth):
             for y in range(self.modelHeight):
                 self.distImgPixData[x+self.modelWidth*a, y+self.modelHeight*b] = tuple(avgColor[i] + \
-                self.modelPixdata[x, y][i] - self.centerColor[i] + self.borderDict.get(x, (0,0,0,0))[i]\
-                - self.borderDict.get(y, (0,0,0,0))[i] for i in range(4))
+                self.modelPixdata[x, y][i] - self.centerColor[i] + self.borderDict.get(x, (0,0,0))[i]\
+                - self.borderDict.get(y, (0,0,0))[i] for i in range(3))
     def apply2Img(self):
-        self.distImgObj = Image.open(self.distImgFile).convert('RGBA')
+        self.distImgObj = Image.open(self.distImgFile)
         self.distImgPixData = self.distImgObj.load()
         self.distImgWidth = self.distImgObj.size[0]
         self.distImgHeight = self.distImgObj.size[1]

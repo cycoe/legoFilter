@@ -7,6 +7,7 @@ import sys
 import os
 
 class LegoFilter():
+
     def __init__(self):
         if len(sys.argv) == 2:
             self.modelSize = 39
@@ -30,17 +31,19 @@ class LegoFilter():
         for i in range(self.modelWidth//40 + 1):
             self.borderDict[i] = (-20, -20, -20)
             self.borderDict[self.modelWidth - (i+1)] = (20, 20, 20)
+
     def single2Img(self, a, b):
         avgColor = (0, 0, 0)
         for x in range(self.modelWidth):
             for y in range(self.modelHeight):
                 avgColor = tuple(self.distImgPixData[x+self.modelWidth*a, y+self.modelHeight*b][i] + avgColor[i] for i in range(3))
-        avgColor = tuple(int(avgColor[i]/(self.modelWidth*self.modelHeight)) for i in range(3))
+        avgColor = tuple(int(avgColor[i]/(self.modelWidth*self.modelHeight)/8) * 8 for i in range(3))
         for x in range(self.modelWidth):
             for y in range(self.modelHeight):
                 self.distImgPixData[x+self.modelWidth*a, y+self.modelHeight*b] = tuple(avgColor[i] + \
                 self.modelPixdata[x, y][i] - self.centerColor[i] + self.borderDict.get(x, (0,0,0))[i]\
                 - self.borderDict.get(y, (0,0,0))[i] for i in range(3))
+
     def apply2Img(self):
         self.distImgObj = Image.open(self.distImgFile)
         self.distImgPixData = self.distImgObj.load()
